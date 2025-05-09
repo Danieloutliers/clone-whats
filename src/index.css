@@ -2,6 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --whatsapp-green: #25D366;
+  --whatsapp-teal: #128C7E;
+  --whatsapp-dark: #075E54;
+  --whatsapp-light: #DCF8C6;
+  --whatsapp-blue: #34B7F1;
+  --gradient-primary: linear-gradient(to right, #25D366, #128C7E);
+}
+
+@layer base {
+  body {
+    @apply bg-gray-100 dark:bg-gray-900;
+  }
+}
+
+@layer components {
+  .message-bubble-sent {
+    @apply relative bg-green-100 dark:bg-green-800 p-3 rounded-lg max-w-[75%] self-end shadow-sm;
+    position: relative;
+  }
+  
+  .message-bubble-sent::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-left-color: theme('colors.green.100');
+    border-bottom-color: theme('colors.green.100');
+    border-right: 0;
+    border-top: 0;
+  }
+  
+  .dark .message-bubble-sent::after {
+    border-left-color: theme('colors.green.800');
+    border-bottom-color: theme('colors.green.800');
+  }
+  
+  .message-bubble-received {
+    @apply relative bg-white dark:bg-gray-700 p-3 rounded-lg max-w-[75%] self-start shadow-sm;
+    position: relative;
+  }
+  
+  .message-bubble-received::after {
+    content: '';
+    position: absolute;
+    left: -8px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-right-color: theme('colors.white');
+    border-bottom-color: theme('colors.white');
+    border-left: 0;
+    border-top: 0;
+  }
+  
+  .dark .message-bubble-received::after {
+    border-right-color: theme('colors.gray.700');
+    border-bottom-color: theme('colors.gray.700');
+  }
+  
+  .chat-header {
+    @apply bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-800 dark:to-teal-900;
+  }
+  
+  .modern-card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-2 px-4 rounded-md transition-all duration-300;
+  }
+}
+
 /* Estilos personalizados para mensagens do WhatsApp */
 .message-tail-right::after {
   content: '';

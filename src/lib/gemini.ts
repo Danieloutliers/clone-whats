@@ -73,10 +73,20 @@ export const generateConversation = async (
       return conversation;
     } catch (parseError) {
       console.error('Erro ao analisar a resposta JSON:', parseError);
-      throw new Error('Formato de resposta inválido');
+      throw new Error('O formato da resposta da API é inválido. Tente novamente com outro modelo ou tema diferente.');
     }
   } catch (error) {
     console.error('Erro ao gerar conversa com o Gemini:', error);
+    if (error instanceof Error) {
+      // Melhorar as mensagens de erro comuns
+      if (error.message.includes('API key')) {
+        throw new Error('API key inválida ou não autorizada. Verifique se a chave foi digitada corretamente.');
+      } else if (error.message.includes('quota') || error.message.includes('limit')) {
+        throw new Error('Limite de cota excedido para esta API key. Tente novamente mais tarde ou use outro modelo.');
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        throw new Error('Erro de conexão com a API do Google. Verifique sua conexão com a internet.');
+      }
+    }
     throw error;
   }
 };

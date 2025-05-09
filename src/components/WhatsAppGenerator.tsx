@@ -7,9 +7,6 @@ import { useChatStore } from '@/hooks/use-chat-store';
 import { Message } from '@/types';
 
 const WhatsAppGenerator: React.FC = () => {
-  // Use state local para garantir que as mensagens sejam renderizadas corretamente
-  const [localMessages, setLocalMessages] = useState<Message[]>([]);
-  
   const { 
     isDarkMode, 
     setIsDarkMode,
@@ -19,12 +16,6 @@ const WhatsAppGenerator: React.FC = () => {
     statusTime,
     batteryLevel
   } = useChatStore();
-  
-  // Sincroniza o estado local com o estado global
-  useEffect(() => {
-    console.log("Atualizando mensagens locais:", messages);
-    setLocalMessages(messages);
-  }, [messages]);
 
   useEffect(() => {
     // Apply dark mode to html element
@@ -46,7 +37,7 @@ const WhatsAppGenerator: React.FC = () => {
           
           <ChatPreview
             isDarkMode={isDarkMode}
-            messages={localMessages}
+            messages={messages}
             contactName={contactName}
             profilePic={profilePic}
             statusTime={statusTime}

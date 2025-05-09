@@ -36,7 +36,7 @@ const initialState: ChatState = {
   profilePic: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
   statusTime: getCurrentTime(),
   batteryLevel: 85,
-  messages: []
+  messages: defaultMessages
 };
 
 // Try to load state from localStorage
