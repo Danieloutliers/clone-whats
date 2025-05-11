@@ -18,9 +18,9 @@ const MessageManagement: React.FC = () => {
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
-  
+
   const { toast } = useToast();
-  
+
   // State to track drag and drop
   const [draggedMessageId, setDraggedMessageId] = useState<string | null>(null);
   const [dragOverMessageId, setDragOverMessageId] = useState<string | null>(null);
@@ -34,16 +34,16 @@ const MessageManagement: React.FC = () => {
       });
       return;
     }
-    
+
     const newMessage: Message = {
       id: editingMessageId || Date.now().toString(),
       text: messageText,
       type: messageType,
       time: messageTime
     };
-    
+
     console.log("Adicionando/editando mensagem:", newMessage);
-    
+
     if (editingMessageId) {
       editMessage(editingMessageId, newMessage);
       setEditingMessageId(null);
@@ -54,7 +54,7 @@ const MessageManagement: React.FC = () => {
     } else {
       addMessage(newMessage);
       console.log("Mensagem adicionada com sucesso");
-      
+
       // Play sound based on message type
       if (messageType === 'sent') {
         playSentSound();
@@ -62,22 +62,22 @@ const MessageManagement: React.FC = () => {
         playReceivedSound();
       }
     }
-    
+
     // Reset form
     setMessageText('');
   };
-  
+
   const handleEditClick = (message: Message) => {
     setMessageText(message.text);
     setMessageType(message.type);
     setMessageTime(message.time);
     setEditingMessageId(message.id);
   };
-  
+
   const handleDeleteClick = (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir esta mensagem?')) {
       deleteMessage(id);
-      
+
       // If editing and deleting the same message, reset the form
       if (editingMessageId === id) {
         setEditingMessageId(null);
@@ -85,21 +85,21 @@ const MessageManagement: React.FC = () => {
       }
     }
   };
-  
+
   const handleEmojiSelect = (emoji: string) => {
     setMessageText(prev => prev + emoji);
     setIsEmojiPickerOpen(false);
   };
-  
+
   const handleDragStart = (id: string) => {
     setDraggedMessageId(id);
   };
-  
+
   const handleDragOver = (e: React.DragEvent, id: string) => {
     e.preventDefault();
     setDragOverMessageId(id);
   };
-  
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (draggedMessageId && dragOverMessageId && draggedMessageId !== dragOverMessageId) {
@@ -108,7 +108,7 @@ const MessageManagement: React.FC = () => {
     setDraggedMessageId(null);
     setDragOverMessageId(null);
   };
-  
+
   return (
     <div className="modern-card p-6 mb-6 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
@@ -117,7 +117,7 @@ const MessageManagement: React.FC = () => {
         </svg>
         Mensagens
       </h2>
-      
+
       {/* Add message form */}
       <div className="mb-5 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
         <div className="mb-4">
@@ -136,12 +136,12 @@ const MessageManagement: React.FC = () => {
             className="w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
           />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-center">
-              <Label className="text-gray-700 dark:text-gray-300 font-medium">Tipo de mensagem</Label>
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+              <Label className="text-gray-700 dark:text-gray-300 font-medium mb-2 sm:mb-0">Tipo de mensagem</Label>
+              <div className="flex items-center space-x-2 sm:space-x-4">
                 <div className="flex items-center">
                   <input 
                     type="radio" 
@@ -152,10 +152,10 @@ const MessageManagement: React.FC = () => {
                     onChange={() => setMessageType('received')}
                     className="mr-2 h-4 w-4 accent-emerald-600" 
                   />
-                  <Label htmlFor="receivedMsg" className="text-gray-700 dark:text-gray-300 flex items-center">
+                  <Label htmlFor="receivedMsg" className="text-gray-700 dark:text-gray-300 flex items-center text-sm sm:text-base">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 text-emerald-600">
                       <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
-                      <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                      <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0-1.79 1.11z"></path>
                     </svg>
                     Recebida
                   </Label>
@@ -170,7 +170,7 @@ const MessageManagement: React.FC = () => {
                     onChange={() => setMessageType('sent')}
                     className="mr-2 h-4 w-4 accent-blue-600" 
                   />
-                  <Label htmlFor="sentMsg" className="text-gray-700 dark:text-gray-300 flex items-center">
+                  <Label htmlFor="sentMsg" className="text-gray-700 dark:text-gray-300 flex items-center text-sm sm:text-base">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 text-blue-600">
                       <path d="m22 2-7 20-4-9-9-4Z"></path>
                       <path d="M22 2 11 13"></path>
@@ -181,29 +181,31 @@ const MessageManagement: React.FC = () => {
               </div>
             </div>
           </div>
-          
-          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <Label htmlFor="messageTime" className="text-gray-700 dark:text-gray-300 font-medium flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-emerald-600 dark:text-emerald-400">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              Horário
-            </Label>
-            <Input 
-              id="messageTime"
-              type="time" 
-              value={messageTime}
-              onChange={(e) => setMessageTime(e.target.value)}
-              className="w-24 px-2 py-1 text-sm border rounded-md shadow-sm focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
-            />
+
+          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+              <Label htmlFor="messageTime" className="text-gray-700 dark:text-gray-300 font-medium mb-2 sm:mb-0 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-emerald-600 dark:text-emerald-400">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Horário
+              </Label>
+              <Input 
+                id="messageTime"
+                type="time" 
+                value={messageTime}
+                onChange={(e) => setMessageTime(e.target.value)}
+                className="w-full sm:w-24 px-2 py-1 text-sm border rounded-md shadow-sm focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+              />
+            </div>
           </div>
         </div>
-        
-        <div className="flex items-center justify-between">
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <button 
             onClick={() => setIsEmojiPickerOpen(true)}
-            className="flex items-center text-gray-600 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 transition-colors p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="flex items-center justify-center w-full sm:w-auto text-gray-600 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 transition-colors p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
               <circle cx="12" cy="12" r="10"></circle>
@@ -213,32 +215,32 @@ const MessageManagement: React.FC = () => {
             </svg>
             Emojis
           </button>
-          
+
           <Button
             onClick={handleAddMessage}
-            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg transform hover:translate-y-[-1px]"
+            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg transform hover:translate-y-[-1px] w-full sm:w-auto"
           >
             {editingMessageId ? (
-              <div className="flex items-center">
+              <div className="flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
-                Atualizar Mensagem
+                <span className="whitespace-nowrap">Atualizar Mensagem</span>
               </div>
             ) : (
-              <div className="flex items-center">
+              <div className="flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                Adicionar Mensagem
+                <span className="whitespace-nowrap">Adicionar Mensagem</span>
               </div>
             )}
           </Button>
         </div>
       </div>
-      
+
       {/* Bulk message import */}
       <div className="mb-5 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
@@ -249,7 +251,7 @@ const MessageManagement: React.FC = () => {
           </svg>
           Importar Conversa
         </h3>
-        
+
         <div className="p-4 mb-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <Label htmlFor="bulkMessages" className="block text-gray-700 dark:text-gray-300 font-medium mb-2 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-emerald-600 dark:text-emerald-400">
@@ -265,8 +267,8 @@ const MessageManagement: React.FC = () => {
             className="w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
           />
         </div>
-        
-        <div className="flex justify-between items-center bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border border-blue-100 dark:border-blue-800 mb-4">
+
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border border-blue-100 dark:border-blue-800 mb-4 gap-3">
           <div className="flex items-start">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 dark:text-blue-400 mt-0.5 mr-2 flex-shrink-0">
               <circle cx="12" cy="12" r="10"></circle>
@@ -293,9 +295,9 @@ const MessageManagement: React.FC = () => {
                 });
                 return;
               }
-                
+
               const lines = textarea.value.split('\n').filter(line => line.trim() !== '');
-              
+
               if (lines.length === 0) {
                 toast({
                   title: "Nenhum texto válido",
@@ -304,17 +306,17 @@ const MessageManagement: React.FC = () => {
                 });
                 return;
               }
-              
+
               let newMessages: Array<{text: string, type: 'sent' | 'received', time: string}> = [];
-              
+
               // Baseado no horário atual, vamos definir um horário base para começar a conversa
               // alguns minutos atrás para que a conversa pareça mais natural
               const baseTime = new Date();
               baseTime.setMinutes(baseTime.getMinutes() - Math.min(10, Math.floor(lines.length / 3)));
-              
+
               let currentMinuteOffset = 0;
               let previousType: 'sent' | 'received' | null = null;
-              
+
               lines.forEach(line => {
                 // Variação realista nos horários das mensagens
                 if (previousType !== null) {
@@ -328,9 +330,9 @@ const MessageManagement: React.FC = () => {
                     currentMinuteOffset += 1;
                   }
                 }
-                
+
                 const currentTime = generateRandomTime(new Date(baseTime), currentMinuteOffset);
-                
+
                 if (line.startsWith('Eu:')) {
                   newMessages.push({
                     text: line.substring(3).trim(),
@@ -361,7 +363,7 @@ const MessageManagement: React.FC = () => {
                   }
                 }
               });
-              
+
               if (newMessages.length === 0) {
                 toast({
                   title: "Nenhuma mensagem identificada",
@@ -370,7 +372,7 @@ const MessageManagement: React.FC = () => {
                 });
                 return;
               }
-              
+
               // Adiciona todas as mensagens processadas
               newMessages.forEach(msg => {
                 addMessage({
@@ -380,29 +382,29 @@ const MessageManagement: React.FC = () => {
                   time: msg.time
                 });
               });
-              
+
               // Limpa o textarea
               textarea.value = '';
-              
+
               toast({
                 title: "Conversa importada",
                 description: `${newMessages.length} mensagens foram importadas com sucesso.`,
               });
             }}
-            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg transform hover:translate-y-[-1px]"
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg transform hover:translate-y-[-1px] w-full sm:w-auto"
           >
-            <div className="flex items-center">
+            <div className="flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                 <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
                 <path d="M12 12v9"></path>
                 <path d="m16 16-4-4-4 4"></path>
               </svg>
-              Importar Mensagens
+              <span className="whitespace-nowrap">Importar Conversas</span>
             </div>
           </Button>
         </div>
       </div>
-      
+
       {/* Messages list */}
       <div className="bg-gray-50 dark:bg-gray-900/60 p-5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
         <div className="flex justify-between items-center mb-4">
@@ -413,8 +415,8 @@ const MessageManagement: React.FC = () => {
             </svg>
             Mensagens Adicionadas
           </h3>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 py-1 px-3 rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="hidden sm:flex items-center text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 py-1 px-3 rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-gray-500">
                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
               </svg>
@@ -432,7 +434,7 @@ const MessageManagement: React.FC = () => {
               }}
               variant="destructive"
               size="sm"
-              className="px-3 py-1.5 text-xs rounded-lg flex items-center"
+              className="px-2 py-1.5 text-xs rounded-lg flex items-center whitespace-nowrap text-[11px] sm:text-xs"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
                 <path d="M3 6h18"></path>
@@ -445,7 +447,7 @@ const MessageManagement: React.FC = () => {
             </Button>
           </div>
         </div>
-        
+
         <div 
           ref={messageListRef}
           className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700"
@@ -510,7 +512,7 @@ const MessageManagement: React.FC = () => {
                     className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors"
                     title="Editar mensagem"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
@@ -543,7 +545,7 @@ const MessageManagement: React.FC = () => {
           )}
         </div>
       </div>
-      
+
       {/* Emoji picker */}
       {isEmojiPickerOpen && (
         <EmojiPicker 
