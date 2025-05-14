@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Message } from '@/types';
 import { captureScreenshot } from '@/lib/html2canvas';
+import { hasImageUrl } from '@/lib/utils';
 import bgImage from '@/assets/Whatsapp_background_image.webp';
 
 interface PixelChatPreviewProps {
@@ -31,27 +32,31 @@ const PixelChatPreview: React.FC<PixelChatPreviewProps> = ({
       id: '1',
       text: 'Oi, amor',
       type: 'sent',
-      time: '08:42 am'
+      time: '08:42 am',
+      imageUrl: undefined
     },
     {
       id: '2',
       text: 'Falar vida',
       type: 'received',
-      time: '08:42 am'
+      time: '08:42 am',
+      imageUrl: undefined
     },
     {
       id: '3',
       text: 'Acabe de ver um desafio de Casal no Tiktok pra junta 10.000 mil em 1 ano vamos fazer em 2025? amor',
       type: 'sent',
-      time: '08:42 am'
+      time: '08:42 am',
+      imageUrl: undefined
     },
     {
       id: '4',
       text: 'Vamos vida manda ai',
       type: 'received',
-      time: '08:42 am'
+      time: '08:42 am',
+      imageUrl: undefined
     },
-  ];
+  ] as Message[];
 
   const handleDownload = async () => {
     if (!chatRef.current) return;
@@ -170,13 +175,10 @@ const PixelChatPreview: React.FC<PixelChatPreviewProps> = ({
         
         {/* Chat area - Material You style (Rounded bubbles) */}
         <div 
-          className="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3 whatsapp-chat-background"
+          className="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3"
           style={{
-            backgroundImage: `url(${bgImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'repeat',
-            backgroundAttachment: 'local'
+            backgroundColor: '#e5ddd5',
+            backgroundImage: 'linear-gradient(to bottom, rgba(229, 221, 213, 0.9), rgba(229, 221, 213, 0.9))'
           }}
         >
           {/* Date header - Material You style */}
@@ -206,6 +208,22 @@ const PixelChatPreview: React.FC<PixelChatPreviewProps> = ({
                 <p className="text-sm text-gray-800 leading-relaxed">
                   {message.text}
                 </p>
+                
+                {hasImageUrl(message) && (
+                  <div className="mt-2 mb-1 overflow-hidden rounded-lg">
+                    <img 
+                      src={message.imageUrl} 
+                      alt="Imagem de mídia" 
+                      className="max-w-full w-full h-auto max-h-[200px] object-cover rounded-lg"
+                      loading="lazy"
+                      onError={(e) => {
+                        // Remover a imagem se falhar ao carregar
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                
                 <div className="flex justify-end items-center gap-1 mt-1">
                   <p className="text-[10px] text-gray-500">{message.time}</p>
                   {message.type === 'sent' && (

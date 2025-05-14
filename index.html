@@ -9,13 +9,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="icon" href="https://cdn.iconscout.com/icon/free/png-256/free-whatsapp-43-189795.png" type="image/png" />
+    
+    <!-- PWA meta tags e ícones -->
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#25D366" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="WhatsApp Fake">
+    <link rel="apple-touch-icon" href="/pwa-icons/whatsapp-icon.svg">
+    <link rel="icon" href="/pwa-icons/whatsapp-icon.svg" type="image/svg+xml" />
+    
+    <!-- Script para carregar o PWA no iOS -->
+    <link rel="apple-touch-startup-image" href="/pwa-icons/whatsapp-icon.svg">
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    
+    <!-- Registro do Service Worker -->
+    <script src="/register-sw.js"></script>
   </body>
 </html>

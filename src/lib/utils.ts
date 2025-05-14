@@ -126,3 +126,10 @@ export function getRandomProfile() {
   const randomIndex = Math.floor(Math.random() * profilesList.length);
   return profilesList[randomIndex];
 }
+
+/**
+ * Verifica se a mensagem possui uma propriedade imageUrl
+ */
+export function hasImageUrl(message: any): message is { imageUrl: string } {
+  return message && typeof message.imageUrl === 'string' && message.imageUrl.length > 0;
+}

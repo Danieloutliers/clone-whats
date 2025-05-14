@@ -10,7 +10,8 @@ export const generateConversation = async (
   apiKey: string, 
   modelName: string,
   topic: string, 
-  messageCount: number = 10
+  messageCount: number = 10,
+  moods: string[] = ['normal']
 ): Promise<Array<{ text: string, type: 'sent' | 'received' }>> => {
   try {
     // Verificar se a API key foi fornecida
@@ -22,11 +23,16 @@ export const generateConversation = async (
     // Usando o modelo fornecido pelo usuário ou um modelo padrão
     const model = genAI.getGenerativeModel({ model: modelName });
 
+    // Preparar a descrição de humor se houver selecionado
+    const moodDescription = moods.includes('normal') 
+      ? "" 
+      : `\nO tom da conversa deve ser ${moods.join(' e ')}.`;
+    
     // Criar um prompt detalhado para gerar uma conversa WhatsApp realista
     const prompt = `
     Crie uma conversa de WhatsApp realista entre duas pessoas em português brasileiro sobre o tema: "${topic}".
     
-    A conversa deve ter aproximadamente ${messageCount} mensagens alternando entre as duas pessoas.
+    A conversa deve ter aproximadamente ${messageCount} mensagens alternando entre as duas pessoas.${moodDescription}
     
     Formate a saída como um JSON array com objetos que contém:
     - "text": o texto da mensagem
@@ -41,6 +47,15 @@ export const generateConversation = async (
 
     Certifique-se que o conteúdo seja realista, use gírias comuns, abreviações e emojis como em conversas reais de WhatsApp. 
     Evite formalidades excessivas.
+    
+    ${moods.includes('engraçado') ? 'Inclua humor, piadas e situações engraçadas.' : ''}
+    ${moods.includes('sério') ? 'Mantenha um tom mais formal e sério.' : ''}
+    ${moods.includes('irritado') ? 'Uma das pessoas ou ambas devem estar irritadas ou discutindo.' : ''}
+    ${moods.includes('romântico') ? 'A conversa deve ter um tom romântico ou flerte entre as pessoas.' : ''}
+    ${moods.includes('formal') ? 'Use uma linguagem mais formal e profissional.' : ''}
+    ${moods.includes('informal') ? 'Use muitas gírias, emojis e linguagem bem informal.' : ''}
+    ${moods.includes('sarcástico') ? 'Inclua sarcasmo e ironia na conversa.' : ''}
+    ${moods.includes('empolgado') ? 'As pessoas devem estar muito animadas e empolgadas.' : ''}
     
     Responda APENAS com o array JSON sem nenhum outro texto ou explicação.
     `;

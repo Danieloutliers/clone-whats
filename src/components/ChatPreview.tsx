@@ -3,7 +3,7 @@ import { captureScreenshot } from '@/lib/html2canvas';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Message } from '@/types';
-import { formatLongDate } from '@/lib/utils';
+import { formatLongDate, hasImageUrl } from '@/lib/utils';
 import bgImage from '@/assets/Whatsapp_background_image.webp';
 
 interface ChatPreviewProps {
@@ -167,13 +167,10 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({
         
         {/* Chat area - iOS style */}
         <div 
-          className="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3 whatsapp-chat-background" 
+          className="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3" 
           style={{
-            backgroundImage: `url(${bgImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'repeat',
-            backgroundAttachment: 'local'
+            backgroundColor: '#e5ddd5',
+            backgroundImage: 'linear-gradient(to bottom, rgba(229, 221, 213, 0.9), rgba(229, 221, 213, 0.9))'
           }}
         >
           {/* Date header - iOS style */}
@@ -203,6 +200,22 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({
                 <p className="text-sm text-gray-800 leading-relaxed">
                   {message.text}
                 </p>
+                
+                {hasImageUrl(message) && (
+                  <div className="mt-2 mb-1 overflow-hidden rounded-lg">
+                    <img 
+                      src={message.imageUrl} 
+                      alt="Imagem de mídia" 
+                      className="max-w-full w-full h-auto max-h-[200px] object-cover rounded-lg"
+                      loading="lazy"
+                      onError={(e) => {
+                        // Remover a imagem se falhar ao carregar
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                
                 <div className="flex justify-end items-center gap-1 mt-1">
                   <p className="text-[10px] text-gray-500">{message.time}</p>
                   {message.type === 'sent' && (

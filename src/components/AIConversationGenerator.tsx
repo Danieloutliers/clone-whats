@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useChatStore } from '@/hooks/use-chat-store';
 import { generateConversation } from '@/lib/gemini';
+import { generateImageFromText, shouldGenerateImage } from '@/lib/imageGenerator';
 import { Message } from '@/types';
 import { generateRandomTime, getRandomProfile } from '@/lib/utils';
 
@@ -15,15 +16,29 @@ const AIConversationGenerator: React.FC = () => {
   const [theme, setTheme] = useState('');
   const [messageCount, setMessageCount] = useState(10);
   const [apiKey, setApiKey] = useState(() => {
-    // Carregar a API key salva no localStorage, se existir, ou usar a padrão
+    // Carregar a API key salva no localStorage, se existir, ou usar a chave de ambiente
     const savedApiKey = localStorage.getItem('gemini_api_key');
-    return savedApiKey || 'AIzaSyC5rJnc5OOvaSDNPl3UUye14FK7o-tT3aQ';
+    return savedApiKey || import.meta.env.VITE_GOOGLE_AI_API_KEY || '';
   });
   const [selectedModel, setSelectedModel] = useState(() => {
     // Carregar o modelo salvo no localStorage, se existir
     const savedModel = localStorage.getItem('gemini_model');
-    return savedModel || 'gemini-1.0-pro';
+    return savedModel || 'gemini-2.0-flash-lite-001';
   });
+  
+  // Estados para controle do humor da IA
+  const [selectedMood, setSelectedMood] = useState<string>('normal');
+  const [availableMoods, setAvailableMoods] = useState({
+    engraçado: false,
+    sério: false,
+    irritado: false,
+    romântico: false,
+    formal: false,
+    informal: false,
+    sarcástico: false,
+    empolgado: false
+  });
+  
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { addMessage, clearAllMessages, setContactName, setProfilePic } = useChatStore();
@@ -74,8 +89,22 @@ const AIConversationGenerator: React.FC = () => {
       setContactName(randomProfile.name);
       setProfilePic(randomProfile.profilePic);
 
-      // Gerar a conversa com o Gemini
-      const conversation = await generateConversation(apiKey, selectedModel, theme, messageCount);
+      // Preparar os humores selecionados
+      const selectedMoods = Object.entries(availableMoods)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([mood]) => mood);
+      
+      // Adicionar o humor padrão se nenhum for selecionado
+      const moodsToUse = selectedMoods.length > 0 ? selectedMoods : ['normal'];
+      
+      // Gerar a conversa com o Gemini, incluindo os humores selecionados
+      const conversation = await generateConversation(
+        apiKey, 
+        selectedModel, 
+        theme, 
+        messageCount,
+        moodsToUse
+      );
       
       // Adicionar as mensagens ao chat com horários variados
       const baseTime = new Date();
@@ -90,38 +119,62 @@ const AIConversationGenerator: React.FC = () => {
       // Processar todas as mensagens primeiro para calcular os horários
       const processedMessages: Message[] = [];
       
-      conversation.forEach((msg: { text: string, type: 'sent' | 'received' }, index) => {
-        // Variar tempos entre mensagens para parecer mais natural
-        // Se o tipo de mensagem mudou (sent -> received ou vice-versa), adicionar pequeno atraso
-        if (previousType !== null && previousType !== msg.type) {
-          // Adicionar 1-2 minutos para a resposta quando muda o tipo da mensagem
-          currentMinuteOffset += Math.floor(Math.random() * 2) + 1;
-        } else {
-          // Mensagens do mesmo tipo em sequência têm intervalos menores
-          // 30% de chance de incrementar o minuteOffset para mensagens do mesmo tipo
-          if (Math.random() < 0.3) {
-            currentMinuteOffset += 1;
+      // Processar cada mensagem e considerar adicionar imagens
+      const processMessagesWithImages = async () => {
+        for (let index = 0; index < conversation.length; index++) {
+          const msg = conversation[index];
+          
+          // Variar tempos entre mensagens para parecer mais natural
+          // Se o tipo de mensagem mudou (sent -> received ou vice-versa), adicionar pequeno atraso
+          if (previousType !== null && previousType !== msg.type) {
+            // Adicionar 1-2 minutos para a resposta quando muda o tipo da mensagem
+            currentMinuteOffset += Math.floor(Math.random() * 2) + 1;
+          } else {
+            // Mensagens do mesmo tipo em sequência têm intervalos menores
+            // 30% de chance de incrementar o minuteOffset para mensagens do mesmo tipo
+            if (Math.random() < 0.3) {
+              currentMinuteOffset += 1;
+            }
           }
+          
+          // Gerar horário para esta mensagem
+          const messageTime = generateRandomTime(new Date(lastTime), currentMinuteOffset);
+          
+          // Verificar se esta mensagem deve ter uma imagem anexada
+          // Apenas mensagens recebidas podem ter imagens (mais natural)
+          let imageUrl: string | undefined = undefined;
+          if (msg.type === 'received' && shouldGenerateImage(msg.text)) {
+            try {
+              const generatedImageUrl = await generateImageFromText(msg.text);
+              // Só atribuir se a URL for válida (não null)
+              if (generatedImageUrl) {
+                imageUrl = generatedImageUrl;
+              }
+            } catch (error) {
+              console.error('Erro ao gerar imagem:', error);
+            }
+          }
+          
+          const message: Message = {
+            id: Date.now().toString() + index,
+            text: msg.text,
+            type: msg.type,
+            time: messageTime,
+            imageUrl: imageUrl
+          };
+          
+          // Salvar o tipo atual para comparar com a próxima mensagem
+          previousType = msg.type;
+          // Atualizar último horário usado
+          lastTime = new Date(baseTime);
+          lastTime.setMinutes(baseTime.getMinutes() + currentMinuteOffset);
+          
+          processedMessages.push(message);
         }
-        
-        // Gerar horário para esta mensagem
-        const messageTime = generateRandomTime(new Date(lastTime), currentMinuteOffset);
-        
-        const message: Message = {
-          id: Date.now().toString() + index,
-          text: msg.text,
-          type: msg.type,
-          time: messageTime
-        };
-        
-        // Salvar o tipo atual para comparar com a próxima mensagem
-        previousType = msg.type;
-        // Atualizar último horário usado
-        lastTime = new Date(baseTime);
-        lastTime.setMinutes(baseTime.getMinutes() + currentMinuteOffset);
-        
-        processedMessages.push(message);
-      });
+      };
+      
+      // Processar mensagens e adicionar imagens
+      await processMessagesWithImages();
       
       // Adicionar as mensagens com pequenos intervalos para manter o visual de chegada gradual
       processedMessages.forEach((message, index) => {
@@ -228,6 +281,12 @@ const AIConversationGenerator: React.FC = () => {
               <SelectValue placeholder="Selecione um modelo" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="gemini-2.0-flash-lite-001" className="flex items-center py-2.5">
+                <span className="flex items-center">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                  gemini-2.0-flash-lite-001 <span className="ml-1.5 text-xs text-gray-500 dark:text-gray-400">(novo - contexto 1056k)</span>
+                </span>
+              </SelectItem>
               <SelectItem value="gemini-1.0-pro" className="flex items-center py-2.5">
                 <span className="flex items-center">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
@@ -318,6 +377,51 @@ const AIConversationGenerator: React.FC = () => {
               <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md">10</span>
               <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md">15</span>
               <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md">20</span>
+            </div>
+            
+            <div className="mt-8">
+              <Label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 flex items-center text-sm sm:text-base">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/40 mr-2.5 flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 dark:text-blue-400">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                  </svg>
+                </span>
+                Humor da conversa:
+              </Label>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                {Object.keys(availableMoods).map((mood) => (
+                  <div 
+                    key={mood} 
+                    className="flex items-center"
+                  >
+                    <input
+                      type="checkbox"
+                      id={`mood-${mood}`}
+                      checked={availableMoods[mood as keyof typeof availableMoods]}
+                      onChange={() => {
+                        setAvailableMoods(prev => ({
+                          ...prev,
+                          [mood]: !prev[mood as keyof typeof availableMoods]
+                        }));
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                    />
+                    <label 
+                      htmlFor={`mood-${mood}`}
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize"
+                    >
+                      {mood}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2 italic">
+                Selecione um ou mais humores para personalizar o tom da conversa.
+              </p>
             </div>
           </div>
         </div>

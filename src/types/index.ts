@@ -5,6 +5,7 @@ export interface Message {
   text: string;
   type: MessageType;
   time: string;
+  imageUrl?: string; // URL da imagem associada à mensagem (opcional)
 }
 
 export interface ChatState {
