@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { captureScreenshot } from '@/lib/html2canvas';
+import { captureScreenshot, saveImage } from '@/lib/html2canvas';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Message } from '@/types';
@@ -66,20 +66,22 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({
       const dataUrl = await captureScreenshot(chatRef.current, bgColor);
       
       if (dataUrl) {
-        const link = document.createElement('a');
-        link.download = `whatsapp-chat-iphone-${new Date().getTime()}.png`;
-        link.href = dataUrl;
-        link.click();
+        const fileName = `whatsapp-chat-iphone-${new Date().getTime()}.png`;
+        const success = await saveImage(dataUrl, fileName);
         
-        toast({
-          title: "Imagem salva com sucesso!",
-          description: "A imagem da conversa foi baixada em resolução 1080x1920.",
-        });
+        if (success) {
+          toast({
+            title: "Imagem salva com sucesso!",
+            description: "A imagem da conversa foi disponibilizada em alta resolução.",
+          });
+        } else {
+          throw new Error('Falha ao salvar a imagem');
+        }
       } else {
-        throw new Error('Failed to generate image URL');
+        throw new Error('Falha ao gerar a URL da imagem');
       }
     } catch (error) {
-      console.error('Failed to capture screenshot', error);
+      console.error('Falha ao capturar screenshot', error);
       toast({
         title: "Erro ao salvar a imagem",
         description: "Não foi possível gerar a imagem da conversa.",
@@ -88,6 +90,15 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({
     }
   };
   
+  // Efeito especial para forçar a atualização do nome no iPhone
+  React.useEffect(() => {
+    // Garantir que o nome seja atualizado no iPhone
+    const contactNameElement = document.getElementById('iphone-contact-name');
+    if (contactNameElement) {
+      contactNameElement.textContent = contactName;
+    }
+  }, [contactName]);
+
   return (
     <div>
       {/* iPhone frame */}
@@ -140,8 +151,8 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({
             </div>
             
             <div>
-              <h3 className="text-black font-bold text-base">
-                {"Amor"}
+              <h3 className="text-black font-bold text-base" id="iphone-contact-name">
+                {contactName}
               </h3>
               <div className="text-gray-500 text-xs">
                 Online

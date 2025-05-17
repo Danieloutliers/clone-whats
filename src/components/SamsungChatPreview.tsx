@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Message } from '@/types';
-import { captureScreenshot } from '@/lib/html2canvas';
+import { captureScreenshot, saveImage } from '@/lib/html2canvas';
 import { hasImageUrl } from '@/lib/utils';
 import bgImage from '@/assets/Whatsapp_background_image.webp';
 
@@ -66,20 +66,22 @@ const SamsungChatPreview: React.FC<SamsungChatPreviewProps> = ({
       const dataUrl = await captureScreenshot(chatRef.current, bgColor);
       
       if (dataUrl) {
-        const link = document.createElement('a');
-        link.download = `whatsapp-chat-samsung-${new Date().getTime()}.png`;
-        link.href = dataUrl;
-        link.click();
+        const fileName = `whatsapp-chat-samsung-${new Date().getTime()}.png`;
+        const success = await saveImage(dataUrl, fileName);
         
-        toast({
-          title: "Imagem salva com sucesso!",
-          description: "A imagem da conversa foi baixada em alta resolução.",
-        });
+        if (success) {
+          toast({
+            title: "Imagem salva com sucesso!",
+            description: "A imagem da conversa foi disponibilizada em alta resolução.",
+          });
+        } else {
+          throw new Error('Falha ao salvar a imagem');
+        }
       } else {
-        throw new Error('Failed to generate image URL');
+        throw new Error('Falha ao gerar a URL da imagem');
       }
     } catch (error) {
-      console.error('Failed to capture screenshot', error);
+      console.error('Falha ao capturar screenshot', error);
       toast({
         title: "Erro ao salvar a imagem",
         description: "Não foi possível gerar a imagem da conversa.",

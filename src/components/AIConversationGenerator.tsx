@@ -16,9 +16,9 @@ const AIConversationGenerator: React.FC = () => {
   const [theme, setTheme] = useState('');
   const [messageCount, setMessageCount] = useState(10);
   const [apiKey, setApiKey] = useState(() => {
-    // Carregar a API key salva no localStorage, se existir, ou usar a chave de ambiente
+    // Carregar a API key salva no localStorage, se existir, ou usar a chave fornecida
     const savedApiKey = localStorage.getItem('gemini_api_key');
-    return savedApiKey || import.meta.env.VITE_GOOGLE_AI_API_KEY || '';
+    return savedApiKey || 'AIzaSyC5rJnc5OOvaSDNPl3UUye14FK7o-tT3aQ';
   });
   const [selectedModel, setSelectedModel] = useState(() => {
     // Carregar o modelo salvo no localStorage, se existir
@@ -245,7 +245,7 @@ const AIConversationGenerator: React.FC = () => {
             </svg>
             <div className="space-y-1.5">
               <p className="text-xs text-blue-700 dark:text-blue-300">
-                Uma API Key padrão já está configurada, mas você pode alterá-la se preferir usar a sua própria.
+                Uma chave API do Google Gemini já está configurada como padrão (AIzaSyC5rJnc5OOvaSDNPl3UUye14FK7o-tT3aQ), mas você pode alterá-la se preferir usar a sua própria.
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
